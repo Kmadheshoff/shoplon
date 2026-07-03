@@ -1,0 +1,6 @@
+{
+  "name": "Shoplon",
+  "description": "A curated e-commerce store for artisanal toys, handbags, and sarees.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
