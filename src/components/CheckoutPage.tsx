@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Product, CartItem } from '../types';
 import { ArrowLeft, CreditCard, Check, QrCode } from 'lucide-react';
 import { addOrder } from '../lib/gasApi';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface CheckoutPageProps {
   cart: CartItem[];
@@ -18,10 +19,11 @@ export default function CheckoutPage({ cart, total, onBack, user, onOrderSuccess
   const [address, setAddress] = useState('');
   const [showQrCode, setShowQrCode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handlePlaceOrder = () => {
-    if (!name.trim() || !mobile.trim() || !city.trim() || !address.trim()) {
-      alert('Please fill in all customer details');
+    if (!name.trim() || mobile.length !== 10 || !city.trim() || !address.trim()) {
+      alert('Please fill in all customer details correctly (Mobile number must be 10 digits)');
       return;
     }
     setShowQrCode(true);
@@ -40,8 +42,21 @@ export default function CheckoutPage({ cart, total, onBack, user, onOrderSuccess
         totalAmount: total,
         itemsDetails: cart.map(item => `${item.name} (${item.quantity})`).join(', ')
       });
-      alert('Order placed successfully!');
-      onOrderSuccess();
+
+      // Send email
+      await fetch('/api/send-order-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'customer@example.com',
+          orderDetails: cart.map(item => `${item.name} (${item.quantity})`).join(', ')
+        })
+      }).catch(e => console.error("Email failed", e));
+
+      setShowSuccess(true);
+      setTimeout(() => {
+        onOrderSuccess();
+      }, 2500);
     } catch (error) {
       console.error(error);
       alert('Failed to place order. Please try again.');
@@ -49,6 +64,26 @@ export default function CheckoutPage({ cart, total, onBack, user, onOrderSuccess
       setLoading(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center p-12 text-center"
+        >
+            <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6"
+            >
+                <Check size={40} className="text-white" />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Successful!</h2>
+            <p className="text-gray-600 dark:text-gray-400">Thank you for your purchase.</p>
+        </motion.div>
+    );
+  }
 
   if (showQrCode) {
     return (
@@ -83,7 +118,18 @@ export default function CheckoutPage({ cart, total, onBack, user, onOrderSuccess
         <div className="space-y-4">
           <h3 className="font-bold dark:text-gray-200 mb-2">Customer Details</h3>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent dark:text-white" />
-          <input type="text" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Mobile Number" className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent dark:text-white" />
+          <input 
+            type="text" 
+            value={mobile} 
+            onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d{0,10}$/.test(val)) {
+                    setMobile(val);
+                }
+            }} 
+            placeholder="Mobile Number (10 digits)" 
+            className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent dark:text-white" 
+          />
           <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent dark:text-white" />
           <textarea 
             value={address}
@@ -97,8 +143,8 @@ export default function CheckoutPage({ cart, total, onBack, user, onOrderSuccess
         <div>
             <h3 className="font-bold dark:text-gray-200 mb-4">Order Summary</h3>
             <div className="space-y-2 mb-4">
-                {cart.map(item => (
-                    <div key={item.id} className="flex justify-between dark:text-gray-400">
+                {cart.map((item, index) => (
+                    <div key={`${item.id}-${index}`} className="flex justify-between dark:text-gray-400">
                         <span>{item.name} x {item.quantity}</span>
                         <span>₹{item.price * item.quantity}</span>
                     </div>

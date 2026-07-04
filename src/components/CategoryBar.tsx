@@ -43,9 +43,9 @@ export default function CategoryBar({ categories, selectedCategory, onSelect }: 
           >
             <span className="text-sm font-medium">All</span>
           </div>
-        {categories.map((category) => (
+        {categories.map((category, index) => (
           <div 
-            key={category} 
+            key={`${category}-${index}`} 
             className={`cursor-pointer px-4 py-1.5 rounded-full border whitespace-nowrap ${
               (selectedCategory === category) 
                 ? 'bg-blue-600 text-white border-blue-600' 

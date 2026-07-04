@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, LogOut, Package, CreditCard, FileText, Gift, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { X, LogOut, Package, CreditCard, FileText, Gift, ArrowLeft } from 'lucide-react';
 import { fetchOrders } from '../lib/gasApi';
 
 interface UserDrawerProps {
@@ -8,8 +8,6 @@ interface UserDrawerProps {
   onClose: () => void;
   user: { email: string } | null;
   onLogout: () => void;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
 }
 
 interface Order {
@@ -30,7 +28,7 @@ const getStatusColor = (status: string) => {
     }
 };
 
-export default function UserDrawer({ isOpen, onClose, user, onLogout, isDarkMode, toggleDarkMode }: UserDrawerProps) {
+export default function UserDrawer({ isOpen, onClose, user, onLogout }: UserDrawerProps) {
   const [showOrders, setShowOrders] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,6 +47,7 @@ export default function UserDrawer({ isOpen, onClose, user, onLogout, isDarkMode
       {isOpen && (
         <>
           <motion.div
+            key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
@@ -56,6 +55,7 @@ export default function UserDrawer({ isOpen, onClose, user, onLogout, isDarkMode
             className="fixed inset-0 bg-black z-50"
           />
           <motion.div
+            key="drawer"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -73,8 +73,8 @@ export default function UserDrawer({ isOpen, onClose, user, onLogout, isDarkMode
                     </button>
                     {loading ? <p className="dark:text-white">Loading orders...</p> : (
                         orders.length === 0 ? <p className="dark:text-white">No orders found.</p> :
-                        orders.map(order => (
-                            <div key={order.OrderID} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        orders.map((order, index) => (
+                            <div key={`${order.OrderID}-${index}`} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                 <div className="flex justify-between mb-2">
                                     <span className="font-bold dark:text-white">{order.OrderID}</span>
                                     <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.Status)}`}>{order.Status}</span>
@@ -97,10 +97,6 @@ export default function UserDrawer({ isOpen, onClose, user, onLogout, isDarkMode
                   <button className="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:text-white"><CreditCard size={20} /> Payment History</button>
                   <button className="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:text-white"><FileText size={20} /> Terms and Conditions</button>
                   <button className="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:text-white"><Gift size={20} /> Offers</button>
-                  <button onClick={toggleDarkMode} className="flex items-center gap-3 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded dark:text-white">
-                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />} 
-                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                  </button>
                   <button onClick={onLogout} className="flex items-center gap-3 w-full p-2 text-red-600 hover:bg-red-50 rounded"><LogOut size={20} /> Logout</button>
                 </nav>
                 </>

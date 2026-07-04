@@ -1,4 +1,4 @@
-const GAS_URL = import.meta.env.VITE_GAS_URL;
+const GAS_URL = import.meta.env.VITE_GAS_URL || 'https://script.google.com/macros/s/AKfycbzd60Ab9Y4DjbQyM9wvLYTpSoqVX8Ddl2sFxMwhgGR0utGjzD6mQw9k5SLxmbODtJD9hg/exec';
 
 export const fetchProducts = async () => {
   const response = await fetch(`${GAS_URL}?action=getProducts`);

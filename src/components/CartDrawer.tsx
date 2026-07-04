@@ -22,6 +22,7 @@ export default function CartDrawer({ isOpen, onClose, onCheckout, cart, removeFr
       {isOpen && (
         <>
           <motion.div
+            key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
@@ -29,6 +30,7 @@ export default function CartDrawer({ isOpen, onClose, onCheckout, cart, removeFr
             className="fixed inset-0 bg-black/50 z-50"
           />
           <motion.div
+            key="drawer"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -53,8 +55,8 @@ export default function CartDrawer({ isOpen, onClose, onCheckout, cart, removeFr
             ) : (
                 <>
                     <div className="space-y-4 mb-8 flex-1 overflow-y-auto">
-                    {cart.map(item => (
-                        <div key={item.id} className="flex gap-4 items-center border border-gray-200 dark:border-gray-800 p-3 rounded-lg">
+                    {cart.map((item, index) => (
+                        <div key={`${item.id}-${index}`} className="flex gap-4 items-center border border-gray-200 dark:border-gray-800 p-3 rounded-lg">
                         <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                         <div className="flex-1">
                             <p className="font-medium dark:text-white">{item.name}</p>

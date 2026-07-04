@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const banners = [
-  'https://images.unsplash.com/photo-1558981852-426c6c22a060?q=80&w=1200&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1596464716127-f2a82d65ee38?q=80&w=1200&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1200&h=400&fit=crop',
+  'https://rukminim2.flixcart.com/fk-p-flap/1600/780/image/d1349d291a64f9ff.jpg?q=80',
+  'https://rukminim2.flixcart.com/fk-p-flap/1600/780/image/3ed16d6d6261840c.jpg?q=80',
+  'https://rukminim2.flixcart.com/fk-p-flap/1600/780/image/d8faeca40ef0a184.png?q=80',
 ];
 
 export default function BannerSlider() {

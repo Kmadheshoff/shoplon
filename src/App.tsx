@@ -18,8 +18,9 @@ import CheckoutPage from './components/CheckoutPage';
 import { fetchProducts } from './lib/gasApi';
 import { useState, useRef, useEffect } from 'react';
 import { Product, CartItem } from './types';
+import { ToastProvider, useToast } from './context/ToastContext';
 
-export default function App() {
+function AppContent() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -31,8 +32,8 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const scrollPositionRef = useRef(0);
+  const { addToast } = useToast();
 
   useEffect(() => {
     fetchProducts().then((data) => {
@@ -65,12 +66,8 @@ export default function App() {
   }, [cart, user]);
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [isCheckoutOpen, selectedCategory]);
 
   const handleLogin = (email: string) => {
     const newUser = { email };
@@ -86,6 +83,8 @@ export default function App() {
   };
 
   const addToCart = (product: Product) => {
+    const isExisting = cart.some(item => item.id === product.id);
+    
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -93,6 +92,12 @@ export default function App() {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
+    
+    if (isExisting) {
+      addToast(`${product.name} quantity updated`, 'success');
+    } else {
+      addToast(`${product.name} added to cart`, 'success');
+    }
   };
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -106,7 +111,11 @@ export default function App() {
   };
 
   const removeFromCart = (productId: string) => {
+    const item = cart.find(i => i.id === productId);
     setCart(prev => prev.filter(item => item.id !== productId));
+    if (item) {
+        addToast(`${item.name} removed from cart`, 'success');
+    }
   };
 
   const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean) as string[];
@@ -131,7 +140,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 overflow-x-hidden pt-20">
+    <div className="min-h-screen bg-gray-100 overflow-x-hidden pt-20">
       <Header 
         user={user} 
         onLoginClick={() => setIsAuthModalOpen(true)} 
@@ -140,6 +149,8 @@ export default function App() {
         onCartClick={() => setIsCartOpen(true)} 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        products={products}
+        onProductSelect={handleProductClick}
       />
       {selectedProduct ? (
         <main className="container mx-auto px-4 py-6">
@@ -161,6 +172,7 @@ export default function App() {
             onOrderSuccess={() => {
                 setCart([]);
                 setIsCheckoutOpen(false);
+                addToast("Order placed successfully!", "success");
             }}
           />
         </main>
@@ -188,12 +200,12 @@ export default function App() {
               />
             ) : (
               <>
-                {categories.map((cat) => {
+                {categories.map((cat, index) => {
                   const catProducts = filteredProducts.filter((p) => p.category === cat);
                   if (catProducts.length === 0) return null;
                   return (
                     <CategorySection
-                      key={cat}
+                      key={`${cat}-${index}`}
                       category={cat}
                       products={catProducts}
                       onProductClick={handleProductClick}
@@ -209,6 +221,7 @@ export default function App() {
                 })}
                 {filteredProducts.some((p) => !p.category || !categories.includes(p.category)) && (
                   <CategorySection
+                    key="other-items"
                     category="Other Items"
                     products={filteredProducts.filter((p) => !p.category || !categories.includes(p.category))}
                     onProductClick={handleProductClick}
@@ -224,8 +237,25 @@ export default function App() {
       )}
       <Footer />
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onLogin={handleLogin} />
-      <UserDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} user={user} onLogout={handleLogout} isDarkMode={isDarkMode} toggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} removeFromCart={removeFromCart} updateQuantity={updateQuantity} onCheckout={() => {setIsCartOpen(false); setIsCheckoutOpen(true);}} />
+      <UserDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} user={user} onLogout={handleLogout} />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} removeFromCart={removeFromCart} updateQuantity={updateQuantity} onCheckout={() => {
+        if (user) {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+        } else {
+          setIsCartOpen(false);
+          setIsAuthModalOpen(true);
+          addToast("Please login to proceed to checkout", "error");
+        }
+      }} />
     </div>
   );
+}
+
+export default function App() {
+    return (
+        <ToastProvider>
+            <AppContent />
+        </ToastProvider>
+    );
 }

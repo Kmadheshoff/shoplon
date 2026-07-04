@@ -112,9 +112,9 @@ export default function CategorySection({
 
       {/* Products Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {displayedProducts.map((product) => (
+        {displayedProducts.map((product, index) => (
           <ProductCard
-            key={product.id}
+            key={`${product.id}-${index}`}
             product={product}
             onClick={onProductClick}
             onAddToCart={onAddToCart}

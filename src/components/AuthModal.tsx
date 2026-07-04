@@ -37,8 +37,8 @@ export default function AuthModal({ isOpen, onClose, onLogin }: { isOpen: boolea
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp.trim()) {
-      setError('Please enter the OTP code to login.');
+    if (otp.trim().length !== 6) {
+      setError('Please enter a valid 6-digit OTP code.');
       return;
     }
     setError('');
@@ -121,10 +121,13 @@ export default function AuthModal({ isOpen, onClose, onLogin }: { isOpen: boolea
                 type="text" 
                 value={otp} 
                 onChange={e => {
-                  setOtp(e.target.value);
+                  const val = e.target.value;
+                  if (/^\d{0,6}$/.test(val)) {
+                    setOtp(val);
+                  }
                   if (error) setError('');
                 }} 
-                placeholder="Enter OTP code" 
+                placeholder="Enter 6-digit OTP" 
                 className="w-full border-b border-gray-300 dark:border-gray-700 pb-2 focus:outline-none focus:border-blue-600 dark:focus:border-blue-400 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 tracking-widest font-mono text-lg" 
               />
               <button 
