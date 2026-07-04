@@ -86,7 +86,7 @@ export default function Header({ user, onLoginClick, onProfileClick, cartCount, 
                 </div>
               )}
             </div>
-            <button onClick={() => setIsMobileSearchOpen(false)} className="p-2 dark:text-white">
+            <button onClick={() => { setIsMobileSearchOpen(false); onSearchChange(''); }} className="p-2 dark:text-white">
               <X size={24} />
             </button>
           </div>
