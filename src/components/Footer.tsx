@@ -32,7 +32,7 @@ export default function Footer() {
             <h3 className="font-bold mb-4">Contact</h3>
             <ul className="text-gray-400 text-sm space-y-2">
                 <li className="flex items-center gap-2"><Mail size={16}/> support@shoplon.com</li>
-                <li className="flex items-center gap-2"><Phone size={16}/> +91 98765 43210</li>
+                <li className="flex items-center gap-2"><Phone size={16}/> +91 90802 82080</li>
                 <li className="flex items-center gap-2"><MapPin size={16}/> Chennai, India</li>
             </ul>
         </div>
